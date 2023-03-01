@@ -42,20 +42,20 @@ def get_discrete_H(Nx, Ny, Nz, dx, dy, dz, xs, ys, zs):
         [main_diagonal, z_diagonals, z_diagonals,y_diagonals, y_diagonals, x_diagonals, x_diagonals],
         offsets=[0, 1, -1, Nz, -Nz, Nz*Ny, -Nz*Ny] )
 
-use_saved=1
+use_saved=0 # use saved arrays (aka only plot them) or not
 #-------------------------
 # Main program
 #-------------------------
 # Number of Eigenvalues
-num_eig=5
+num_eig=2
 
 # Intervals for calculating the wave function [-L/2,L/2] (in atomic units)
-Ls = np.array([ 8,8,8 ]) # (Lx, Ly, Lz) Bohr Radii
+Ls = np.array([ 5.7,5.7,5.7 ]) # (Lx, Ly, Lz) Bohr Radii
 xlowers = -Ls/2.0
 xuppers = Ls/2.0
 
 # Number of points to be used per dimension
-Ns = [200,200,200] # (Nx, Ny, Nz)
+Ns = [50,50,50] # (Nx, Ny, Nz)
 
 # Increments to be used per dimension
 dxs = [(xuppers[j]-xlowers[j])/(Ns[j]-1) for j in range(3)] # (dx, dy, dz)
@@ -81,7 +81,7 @@ if not use_saved:
 
     # Diagonalize the matrix F
     print("> Diagonalizing Hamiltonian...")
-    eigenValues, eigenVectors = lg.eigsh(H, k=num_eig, which='SM', maxiter=200, tol=0.01)
+    eigenValues, eigenVectors = lg.eigsh(H, k=num_eig, which='SM', maxiter=1000, tol=0.01)
     print(f"  Done! Taken {time()-t1:.4}s\n")
     
     print("> Normalising the eigenstates...")
@@ -112,7 +112,7 @@ for k in range(0,num_eig):
 
 #Plot Wave functions
 print("> Plotting...")
-every=2 # Only take one data point every this number in each axis to plot
+every=1 # Only take one data point every this number in each axis to plot
 grid = np.array(np.meshgrid(*nodes))[:,::every, ::every, ::every]
 print(grid.shape)
 for j in range(0, num_eig):
@@ -120,7 +120,7 @@ for j in range(0, num_eig):
     ax = fig.add_subplot(111, projection='3d')
 
     colormap = ax.scatter3D(*grid, c=eigenStates[j, ::every, ::every, ::every], cmap='seismic',
-            s=0.003, alpha=0.4 ) #, antialiased=True)
+            s=0.05, alpha=0.4 ) #, antialiased=True)
     fig.colorbar(colormap, fraction=0.04, location='left')
     ax.set_xlabel("x (Bohr Radii)")
     ax.set_ylabel("y (Bohr Radii)")
@@ -132,8 +132,8 @@ for j in range(0, num_eig):
     fig = plt.figure( figsize=(7,7))
     ax = fig.add_subplot(111, projection='3d')
 
-    colormap = ax.scatter3D(*grid, c=np.abs(eigenStates[j, ::every, ::every, ::every])**2, cmap='hot',
-            s=0.003, alpha=0.4 ) #, antialiased=True)
+    colormap = ax.scatter3D(*grid, c=np.abs(eigenStates[j, ::every, ::every, ::every])**2, cmap='hot_r',
+            s=0.05, alpha=0.4 ) #, antialiased=True)
     fig.colorbar(colormap, fraction=0.04, location='left')
     ax.set_xlabel("x (Bohr Radii)")
     ax.set_ylabel("y (Bohr Radii)")
